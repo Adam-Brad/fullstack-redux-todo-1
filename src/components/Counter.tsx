@@ -1,33 +1,46 @@
-import React, {Dispatch} from 'react';
+import React, { Dispatch, useEffect, useState } from 'react';
 import {connect} from 'react-redux';
 import {Action} from "redux";
+import StoreState, { Todo, TodoAction } from "../reducers/listReducer";
+import axios from "axios";
 
-interface CounterProps {
-    count: number;
-    onClick: () => void;
+const API_URL = '/api/todo/';
+
+interface Props {
+    setList: (list: Todo[]) => void;
 }
 
-const Counter = (props: CounterProps) => (
-  <div>
-    <div>Current count: {props.count}</div>
-    <button onClick={props.onClick}>Increment</button>
-  </div>
-);
+const App = ({ setList }: Props) => {
+    const [task, setTask] = useState<string>('');
 
-interface StoreState {
-    count: number
-}
+    useEffect(() => {
+        axios.get(API_URL)
+          .then(({data}) => setList(data))
+    }, [])
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setTask(event.target.value);
+    }
+
+    return (
+      <div>
+          <input onChange={() => handleChange}/>
+          <button onClick={() => ({})}>Click to add</button>
+      </div>
+    );
+};
 
 function mapStateToProps(state: StoreState) {
     return {
-        count: state.count
+        list: state.list
     };
 }
 
-function mapDispatchToProps(dispatch: Dispatch<Action<string>>) {
+function mapDispatchToProps(dispatch: Dispatch<TodoAction>) {
     return {
-        onClick: () => dispatch({
-            type: 'INCREMENT'
+        setList: (list: Todo[]) => dispatch({
+            type: 'SET_LIST',
+            payload: list
         })
     };
 }
@@ -35,4 +48,4 @@ function mapDispatchToProps(dispatch: Dispatch<Action<string>>) {
 export const CounterContainer = connect(
   mapStateToProps,
   mapDispatchToProps
-)(Counter);
+)(App);
