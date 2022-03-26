@@ -1,31 +1,47 @@
 import React, { Dispatch, useEffect, useState } from 'react';
-import {connect} from 'react-redux';
-import {Action} from "redux";
-import StoreState, { Todo, TodoAction } from "../reducers/listReducer";
+import { connect } from 'react-redux';
 import axios from "axios";
+import StoreState, { Todo, TodoAction, TodoDraft } from "../interfaces";
+import { sortAndMapTodos } from "../helpers";
 
 const API_URL = '/api/todo/';
 
 interface Props {
+    list: Todo[];
     setList: (list: Todo[]) => void;
 }
 
-const App = ({ setList }: Props) => {
+const App = ({list, setList}: Props) => {
     const [task, setTask] = useState<string>('');
 
-    useEffect(() => {
+    function fetchTodos() {
         axios.get(API_URL)
           .then(({data}) => setList(data))
+    }
+
+    useEffect(() => {
+        fetchTodos();
     }, [])
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTask(event.target.value);
     }
 
+    const handleAdd = () => {
+        const todoToAdd: TodoDraft = {
+            text: task,
+            is_done: false,
+        };
+        axios.post(API_URL, todoToAdd)
+          .then(() => fetchTodos())
+          .catch(error => console.error(error))
+    }
+
     return (
       <div>
-          <input onChange={() => handleChange}/>
-          <button onClick={() => ({})}>Click to add</button>
+          <input onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange(event)}/>
+          <button onClick={() => handleAdd()}>Click to add</button>
+          {sortAndMapTodos(list)}
       </div>
     );
 };
@@ -45,7 +61,7 @@ function mapDispatchToProps(dispatch: Dispatch<TodoAction>) {
     };
 }
 
-export const CounterContainer = connect(
+export const AppContainer = connect(
   mapStateToProps,
   mapDispatchToProps
 )(App);

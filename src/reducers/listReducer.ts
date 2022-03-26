@@ -1,18 +1,4 @@
-import {Action} from "redux";
-
-export interface Todo {
-  text: string;
-  is_done: boolean;
-}
-
-export default interface StoreState {
-  list: Todo[];
-}
-
-export interface TodoAction {
-  type: string;
-  payload: Todo[]
-}
+import StoreState, { TodoAction } from "../interfaces";
 
 const initialState = { list: [] };
 
