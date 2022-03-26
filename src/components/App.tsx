@@ -2,7 +2,7 @@ import React, { Dispatch, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import axios from "axios";
 import StoreState, { Todo, TodoAction, TodoDraft } from "../interfaces";
-import { sortAndMapTodos } from "../helpers";
+import { sortTodos } from "../helpers";
 
 const API_URL = '/api/todo/';
 
@@ -37,11 +37,25 @@ const App = ({list, setList}: Props) => {
           .catch(error => console.error(error))
     }
 
+    const handleDelete = (todo: Todo) => {
+        axios.delete(API_URL + `/${todo.id}`)
+          .then(() => fetchTodos())
+          .catch(error => console.error(error))
+    }
+
+    const sortedAndMappedTodos = sortTodos(list).map((todo) => (
+        <>
+            <li key={todo.id}>{todo.text}</li>
+            <button onClick={() => handleDelete(todo)}>Delete</button>
+        </>
+      )
+    );
+
     return (
       <div>
           <input onChange={(event: React.ChangeEvent<HTMLInputElement>) => handleChange(event)}/>
           <button onClick={() => handleAdd()}>Click to add</button>
-          {sortAndMapTodos(list)}
+          {sortedAndMappedTodos}
       </div>
     );
 };
